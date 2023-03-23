@@ -1,4 +1,4 @@
-const {Schema, model} = require('mongoose');
+import { Schema, model } from 'mongoose';
 
 const CarrouselSchema = new Schema({
     image: {
@@ -11,4 +11,4 @@ const CarrouselSchema = new Schema({
     }
 })
 
-module.exports = model('carrousel', CarrouselSchema);
+export default  model('carrousel', CarrouselSchema);

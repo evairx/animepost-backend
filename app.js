@@ -1,20 +1,52 @@
-const express = require('express');
-const AnimeRoutes = require('./routes/anime.routes');
-const AnimeModel = require("./models/Anime")
-const CarrouselRoutes = require('./routes/carrousel.routes');
-const cors = require('cors');
-const slugify = require('slugify');
+import express from 'express';
+import cors from 'cors';
+import slugify from 'slugify';
+import session from'express-session';
 
-require('./db/dbConnect');
+import AnimeRoutes from './routes/anime.routes.js'
+import UserRoutes from './routes/user.routes.js';
+import AnimeModel from './models/Anime.js';
+import CarrouselRoutes from './routes/carrousel.routes.js';
+
+import './db/dbConnect.js';
+import './libs/initialSetup.js';
+
 
 const PORT = 4000;
 
 const app = express();
 
+app.use(
+  session({
+    secret: "D&p612SF6lvA",
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false },
+  })
+);
+
 app.use(express.json());
-app.use(cors());
-app.get('/', (req, res) => {
-    res.redirect('https://animepost.net/');
+app.use(cors({
+  origin: "http://localhost:3000",
+  credentials: true
+}));
+
+app.use('/', UserRoutes)
+app.use('/v1', AnimeRoutes);
+app.use('/carrousel', CarrouselRoutes)
+
+
+app.get('/popular', async (req, res) => {
+  try {
+    // Buscar los documentos de anime ordenados por el número de vistas
+    const popularAnimes = await AnimeModel.find().sort({ views: 'desc' });
+
+    // Enviar los documentos de anime como respuesta JSON
+    res.json(popularAnimes);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error del servidor');
+  }
 });
 
 app.post('/animes/:id/episodes', async (req, res) => {
@@ -45,9 +77,6 @@ app.post('/animes/:id/episodes', async (req, res) => {
       res.status(500).json({ message: error.message });
     }
   });
-
-app.use('/v1', AnimeRoutes);
-app.use('/carrousel', CarrouselRoutes)
 
 app.listen(PORT, function() {
     console.log(`Open: http://localhost:${PORT}`)

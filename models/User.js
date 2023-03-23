@@ -1,24 +1,45 @@
-const {Schema, model} = require('mongoose');
-const bycript = require('bcryptjs');
+import {Schema, model} from "mongoose";
+import bycript from 'bcryptjs';
 
 const UserSchema = new Schema({
-    user: {
+    username: {
         type: String,
-        required: true
+        required: true,
+        unique: true,
     },
     email: {
         type: String,
-        required: true
+        required: true,
+        unique: true,
     },
     password: {
         type: String,
-        required: true
+        required: true,
     },
-    role: {
+    roles: [{
+        ref: "Role",
+        type: Schema.Types.ObjectId,
+    }],
+    views: {
+        type: Number,
+        default: 0,
+    },
+    yearsOld: {
         type: String,
-        enum: ['user', 'premium', 'admin'],
-        default: 'user'
-    }
+        required: true,
+    },
+    country: {
+        type: String,
+        required: true,
+    },
+    overview: {
+        type: String,
+        required: false,
+    },
+
+},{
+    timestamps: true,
+    versionKey: false,
 });
 
 UserSchema.methods.encryptPassword = async (password) => {
@@ -30,4 +51,4 @@ UserSchema.methods.validatePassword = function (password) {
     return bycript.compare(password, this.password);
 }
 
-module.exports = model('User', UserSchema);
+export default model('User', UserSchema);

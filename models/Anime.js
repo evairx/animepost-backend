@@ -1,9 +1,21 @@
-const {Schema, model} = require('mongoose');
-const slugify = require('slugify');
+import { Schema, model } from 'mongoose';
+import slugify from 'slugify';
+
+function generateRandomId() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let id = 'G';
+  for (let i = 0; i < 8; i++) {
+    id += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return id;
+}
 
 const AnimeSchema = new Schema({
-
-    japaneseTitle: {
+	_id: {
+		type: String,
+		default: generateRandomId,
+	},
+    title: {
         type: String,
         required: true,
     },
@@ -14,7 +26,7 @@ const AnimeSchema = new Schema({
         type: String,
         required: false
     },
-    posterImage: {
+    poster: {
         type: String,
         required: true
     },
@@ -32,11 +44,11 @@ const AnimeSchema = new Schema({
         type: String,
         required: true
     },
-    category: {
+    type: {
         type: String,
         required: true,
     },
-    tags: [
+    genres: [
         {
             type: String,
             required: false,
@@ -57,6 +69,10 @@ const AnimeSchema = new Schema({
     fileId: {
         type: String,
         required: true
+    },
+    views: {
+        type: Number,
+        default: 0
     },
     episodes: [
         {
@@ -132,4 +148,4 @@ AnimeSchema.pre("save", function(next) {
     next();
   });
 
-module.exports = model('Anime', AnimeSchema);
+export default model('Anime', AnimeSchema);

@@ -1,4 +1,4 @@
-const CarrouselModel = require('../models/Carrousel');
+import CarrouselModel from '../models/Carrousel.js';
 
 const getCarrousel = (req, res) =>{
     CarrouselModel.find()
@@ -19,4 +19,9 @@ const addCarrousel = async (req, res) => {
     };
   };
 
-module.exports = {getCarrousel, addCarrousel}
+const CarrouselExports = {
+    getCarrousel,
+    addCarrousel,
+}
+
+export default CarrouselExports;

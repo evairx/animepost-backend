@@ -1,9 +1,10 @@
-const express = require('express');
-const CarrouselController = require('../controller/Carrousel');
+import express from 'express';
+import CarrouselController from '../controller/Carrousel.js';
+
 const router = express.Router();
 
 router.get('/', CarrouselController.getCarrousel);
 
 router.post('/',CarrouselController.addCarrousel);
 
-module.exports = router;
+export default router;

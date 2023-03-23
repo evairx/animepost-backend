@@ -1,4 +1,4 @@
-const AnimeModel = require('../models/Anime');
+import AnimeModel from '../models/Anime.js';
 
 const getAnimes = (req, res) =>{
     AnimeModel.find()
@@ -19,9 +19,13 @@ const addAnime = async (req, res) => {
   };
 };
 
-const getAnimesById = (req,res) => {
-    AnimeModel.findOne({ titleslug: req.params.titleslug })
-    .then((data) => res.status(200).json(data))
+const getAnimesById = (req, res) => {
+  AnimeModel.findOne({ _id: req.params.id })
+    .then((anime) => {
+        anime.views += 1;
+        anime.save();
+        res.status(200).json(anime);
+    })
     .catch(() => res.status(400).json({ message: "Bad Request"}));
 }
 
@@ -51,9 +55,9 @@ const patchAnimeById = (req, res) => {
 
 const getAnimeEpisodes = async (req, res) => {
   try {
-    const { params: { animeSlug, episodeSlug } } = req;
+    const { params: { id, episodeSlug } } = req;
 
-    const anime = await AnimeModel.findOne({ titleslug: animeSlug });
+    const anime = await AnimeModel.findOne({ _id: id });
     if (!anime) {
         throw new Error("The anime wasn't found!");
     };
@@ -124,6 +128,26 @@ const deleteEpisodeBySlug = async (req, res) => {
   }
 };
 
+const getAnimeByGenre = async (req, res) => {
+  const genre = req.query.genre; // obtiene el genero de la URL
+  try {
+    const animes = await AnimeModel.find({ genres: genre }); // busca todos los animes que contienen el genero
+    res.json(animes); // devuelve los animes encontrados con ese genero
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error en el servidor');
+  }
+}
 
+const AnimesExports = {
+  getAnimes,
+  addAnime,
+  getAnimesById,
+  deleteAnimeById,
+  patchAnimeById,
+  getAnimeEpisodes,
+  deleteEpisodeBySlug,
+  getAnimeByGenre
+}
 
-module.exports = {getAnimes, addAnime, getAnimesById, deleteAnimeById, patchAnimeById, getAnimeEpisodes, deleteEpisodeBySlug};
+export default AnimesExports;
