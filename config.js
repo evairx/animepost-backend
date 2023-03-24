@@ -1,3 +1,3 @@
 export default {
-    secret: 'mytoken'
+    secretkey: 'mytoken'
 };

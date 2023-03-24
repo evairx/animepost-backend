@@ -18,7 +18,7 @@ const UserSchema = new Schema({
     },
     roles: [{
         ref: "Role",
-        type: Schema.Types.ObjectId,
+	    type: String,
     }],
     views: {
         type: Number,
@@ -36,7 +36,13 @@ const UserSchema = new Schema({
         type: String,
         required: false,
     },
-
+    favorites: [{
+        id: {
+            type: Array,
+            required: false,
+            default: []
+        }
+    }]
 },{
     timestamps: true,
     versionKey: false,

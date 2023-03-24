@@ -1,48 +1,133 @@
 import AnimeModel from '../models/Anime.js';
+import UserModel from '../models/User.js'
+import config from '../config.js';
+import jwt from 'jsonwebtoken';
 
-const getAnimes = (req, res) =>{
+const getAnimes = async(req, res) =>{
+  try {
+
+    // Obtener el public token access
+    const token = req.headers.authorization.split(" ")[1];
+
+    // Verificar el token de autenticación
+    const decodedToken = jwt.verify(token, config.secretkey);
+    const userId = decodedToken.id;
+
+    // Buscar al usuario por ID
+    const user = await UserModel.findById(userId);
+
+    // Si el usuario no existe
+    if (!user) {
+        return res.status(401).json({ message: "Usuario no encontrado" });
+    }
+
     AnimeModel.find()
-     .then((data) => res.status(200).json(data))
-     .catch(() => res.status(400).json({ message: "Bad Request"}));
+    .then((data) => res.status(200).json(data))
+    .catch(() => res.status(400).json({ message: "Bad Request"}));
+  }catch (error){
+    res.status(401).json({ error: "access-token-invalid", description: "auth.missing" });
+  }
 };
 
 const addAnime = async (req, res) => {
   try {
-      const { body } = req;
-      const anime = await AnimeModel.create(body);
-      if (!anime) {
+    // Obtener el token de autenticación del encabezado
+    const token = req.headers.authorization.split(" ")[1];
+
+    // Verificar el token de autenticación y obtener el ID y roles del usuario
+    const decodedToken = jwt.verify(token, config.secretkey);
+    const userId = decodedToken.id;
+    const userRoles = decodedToken.role;
+
+    // Buscar al usuario por ID
+    const user = await UserModel.findById(userId);
+
+    if (!user) {
+      return res.status(401).json({ error: "user-no-found" });
+    }
+
+    // Verificar si el usuario tiene el rol de "admin"
+    if (!userRoles.includes("admin")) {
+      return res.status(401).json({ unauthorized: "you do not have the rank to perform this action" });
+    }
+
+    const { body } = req;
+    const anime = await AnimeModel.create(body);
+
+    if (!anime) {
           throw new Error("El anime no pudo ser creado!");
-      };
+    };
+
       res.status(200).json("El anime ha sido creado exitosamente!");
   } catch (error) {
-      res.status(500).json(error);
+      res.status(401).json({ error: "access-token-invalid", description: "auth.missing" });
   };
 };
 
-const getAnimesById = (req, res) => {
-  AnimeModel.findOne({ _id: req.params.id })
-    .then((anime) => {
-        anime.views += 1;
-        anime.save();
-        res.status(200).json(anime);
-    })
-    .catch(() => res.status(400).json({ message: "Bad Request"}));
+const getAnimesById = async(req, res) => {
+  try {
+        // Obtener el public token access
+        const token = req.headers.authorization.split(" ")[1];
+
+        // Verificar el token de autenticación
+        const decodedToken = jwt.verify(token, config.secretkey);
+        const userId = decodedToken.id;
+    
+        // Buscar al usuario por ID
+        const user = await UserModel.findById(userId);
+    
+        // Si el usuario no existe
+        if (!user) {
+            return res.status(401).json({ message: "Usuario no encontrado" });
+        }
+
+        AnimeModel.findOne({ _id: req.params.id })
+        .then((anime) => {
+            anime.views += 1;
+            anime.save();
+            res.status(200).json(anime);
+        })
+        .catch(() => res.status(400).json({ message: "Bad Request"}));
+
+  } catch (error) {
+    res.status(401).json({ error: "access-token-invalid", description: "auth.missing" });
+  }
 }
 
 
-const deleteAnimeById = async (req,res) => {
+const deleteAnimeById = async (req, res) => {
   try {
-    const {id} = req.params;
-    
-    const animeDelte= await AnimeModel.findByIdAndDelete(id);
+    // Obtener el token de autenticación del encabezado
+    const token = req.headers.authorization.split(" ")[1];
 
-    if(!animeDelte){
+    // Verificar el token de autenticación y obtener el ID y roles del usuario
+    const decodedToken = jwt.verify(token, config.secretkey);
+    const userId = decodedToken.id;
+    const userRoles = decodedToken.role;
+
+    // Buscar al usuario por ID
+    const user = await UserModel.findById(userId);
+
+    if (!user) {
+      return res.status(401).json({ error: "user-no-found" });
+    }
+
+    // Verificar si el usuario tiene el rol de "admin"
+    if (!userRoles.includes("admin")) {
+      return res.status(401).json({ unauthorized: "admin-not-found" });
+    }
+
+    const { id } = req.params;
+
+    const animeDelte = await AnimeModel.findByIdAndDelete(id);
+
+    if (!animeDelte) {
       throw new Error("El anime no pudo ser eliminado!");
     }
     res.status(200).json("El anime ha sido eliminado exitosamente!");
   } catch {
-    res.status(500).json(error);
-  };
+    res.status(401).json({ error: "access-token-invalid", description: "auth.missing" });
+  }
 };
 
 const patchAnimeById = (req, res) => {

@@ -22,7 +22,7 @@ const AnimeSchema = new Schema({
     titleslug: {
         type: String
     },
-    englishTitle: {
+    japaneseTitle: {
         type: String,
         required: false
     },
@@ -107,9 +107,9 @@ const AnimeSchema = new Schema({
 }, { timestamps: true });
   
 AnimeSchema.pre("save", function(next) {
-    const isModified = this.isModified("japaneseTitle");
+    const isModified = this.isModified("title");
     if (isModified) {
-        this.titleslug = slugify(this.japaneseTitle, {remove: /[%\<>#',.!?:]/gi, lower: true });
+        this.titleslug = slugify(this.title, {remove: /[%\<>#',.!?:]/gi, lower: true });
     };
     next();
 });

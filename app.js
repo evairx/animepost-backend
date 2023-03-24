@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import slugify from 'slugify';
-import session from'express-session';
 
 import AnimeRoutes from './routes/anime.routes.js'
 import UserRoutes from './routes/user.routes.js';
@@ -16,18 +15,9 @@ const PORT = 4000;
 
 const app = express();
 
-app.use(
-  session({
-    secret: "D&p612SF6lvA",
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false },
-  })
-);
-
 app.use(express.json());
+
 app.use(cors({
-  origin: "http://localhost:3000",
   credentials: true
 }));
 
